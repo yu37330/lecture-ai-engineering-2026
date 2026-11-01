@@ -1,0 +1,29 @@
+{
+  "executed_training_myself": true,
+  "method": "LoRA（FP32基盤モデル）",
+  "config": {
+    "base_model": "Qwen/Qwen3.5-0.8B",
+    "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+    "seed": 42,
+    "num_train_epochs": 4,
+    "lr": 0.0002,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "max_new_tokens": 200,
+    "do_sample": false
+  },
+  "training_rows": 116,
+  "evaluation_rows": 12,
+  "train_seconds": 148.5,
+  "training_steps": 60,
+  "final_logged_loss": 0.7645584583282471,
+  "before_eval_seconds": 123.52,
+  "after_eval_seconds": 56.18,
+  "versions": {
+    "torch": "2.11.0+cu130",
+    "transformers": "5.18.0",
+    "peft": "0.21.1",
+    "trl": "1.14.2"
+  },
+  "correct_rate": "人手評価: 前1/12・後3/12; 単純辞書検索9/12"
+}

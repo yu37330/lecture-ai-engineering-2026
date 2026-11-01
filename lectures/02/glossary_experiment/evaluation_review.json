@@ -1,0 +1,160 @@
+{
+  "assessment": "assistant manual evaluation of uploaded eval_before/eval_after JSON against gold_definition",
+  "scoring_rule": "主要概念が正しく重大な矛盾がないこと。MCPの2回答は補足の誤りを明記した上で中心概念により正答とした。用語集にない質問は未掲載と明示した場合のみ正解。",
+  "questions": [
+    {
+      "id": 1,
+      "category": "direct",
+      "expected_term_id": "lora",
+      "before_correct": false,
+      "after_correct": false,
+      "lexical_prediction": "lora",
+      "lexical_correct": true,
+      "reason": "LoRAの正式名称を誤認した（学習前）。学習後も低ランク行列の積を正確に説明できず、三次元ベクトルなどの誤りがある。"
+    },
+    {
+      "id": 2,
+      "category": "direct",
+      "expected_term_id": "mcp",
+      "before_correct": false,
+      "after_correct": true,
+      "lexical_prediction": "mcp",
+      "lexical_correct": true,
+      "reason": "学習前は略称を誤認。学習後はサーバーとクライアントでツールを接続する中心概念が正しい。ただし補足に不正確な表現がある。"
+    },
+    {
+      "id": 3,
+      "category": "direct",
+      "expected_term_id": "overfitting",
+      "before_correct": true,
+      "after_correct": true,
+      "lexical_prediction": "overfitting",
+      "lexical_correct": true,
+      "reason": "学習前後とも学習データへの過度な適合と未知入力での性能低下を説明できた。"
+    },
+    {
+      "id": 4,
+      "category": "alias",
+      "expected_term_id": "lora",
+      "before_correct": false,
+      "after_correct": false,
+      "lexical_prediction": "lora",
+      "lexical_correct": true,
+      "reason": "学習前はLow-Rank Approximationと混同。学習後も追加の低ランク行列のみ学習する仕組みを誤説明。"
+    },
+    {
+      "id": 5,
+      "category": "alias",
+      "expected_term_id": "mcp",
+      "before_correct": false,
+      "after_correct": false,
+      "lexical_prediction": "mcp",
+      "lexical_correct": true,
+      "reason": "学習前は曖昧な概念。学習後はモデル・クライアント選択の規格と誤説明。"
+    },
+    {
+      "id": 6,
+      "category": "alias",
+      "expected_term_id": "overfitting",
+      "before_correct": false,
+      "after_correct": false,
+      "lexical_prediction": "overfitting",
+      "lexical_correct": true,
+      "reason": "学習前は同語反復。学習後も未知データでの性能低下という定義を説明できない。"
+    },
+    {
+      "id": 7,
+      "category": "paraphrase",
+      "expected_term_id": "lora",
+      "before_correct": false,
+      "after_correct": false,
+      "lexical_prediction": null,
+      "lexical_correct": false,
+      "reason": "学習前は一般的な低ランク学習、学習後はlow_rank_adam2などを回答しLoRAを特定できない。"
+    },
+    {
+      "id": 8,
+      "category": "paraphrase",
+      "expected_term_id": "overfitting",
+      "before_correct": false,
+      "after_correct": false,
+      "lexical_prediction": null,
+      "lexical_correct": false,
+      "reason": "学習前は過学習の核心を説明したが「過学習の欠如」という矛盾を含む。学習後は入力分布への対応という別概念を説明。"
+    },
+    {
+      "id": 9,
+      "category": "paraphrase",
+      "expected_term_id": "mcp",
+      "before_correct": false,
+      "after_correct": true,
+      "lexical_prediction": "external-tool",
+      "lexical_correct": false,
+      "reason": "学習前はREST/GraphQL。学習後はMCPの名称と標準接続規格という中心概念が正しいが、APIコードや設定をクライアントに渡すという不正確な補足がある。"
+    },
+    {
+      "id": 10,
+      "category": "unknown",
+      "expected_term_id": null,
+      "before_correct": false,
+      "after_correct": false,
+      "lexical_prediction": null,
+      "lexical_correct": true,
+      "reason": "用語集に未掲載のDPOについて未掲載と答えず説明を生成。"
+    },
+    {
+      "id": 11,
+      "category": "unknown",
+      "expected_term_id": null,
+      "before_correct": false,
+      "after_correct": false,
+      "lexical_prediction": null,
+      "lexical_correct": true,
+      "reason": "用語集に未掲載のGRPOについて未掲載と答えず説明を生成。"
+    },
+    {
+      "id": 12,
+      "category": "unknown",
+      "expected_term_id": null,
+      "before_correct": false,
+      "after_correct": false,
+      "lexical_prediction": null,
+      "lexical_correct": true,
+      "reason": "用語集に未掲載のRAPTOR検索について未掲載と答えず説明を生成。"
+    }
+  ],
+  "counts": {
+    "n": 12,
+    "before": 1,
+    "after": 3,
+    "lexical": 9
+  },
+  "by_category": {
+    "direct": {
+      "before": 1,
+      "after": 2,
+      "lexical": 3
+    },
+    "alias": {
+      "before": 0,
+      "after": 0,
+      "lexical": 3
+    },
+    "paraphrase": {
+      "before": 0,
+      "after": 1,
+      "lexical": 0
+    },
+    "unknown": {
+      "before": 0,
+      "after": 0,
+      "lexical": 3
+    }
+  },
+  "limitations": [
+    "11/1評価:12問の小標本",
+    "評価は人手による中心概念判定",
+    "辞書検索はEmbedding RAGではない",
+    "公式演習のJSON形式を測るformat_rate/content_rateは未測定"
+  ]
+}

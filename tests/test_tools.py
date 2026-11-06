@@ -1,6 +1,8 @@
 """ツールのテスト（LLMもAPIキーも使わない）。"""
 
 import json
+from datetime import datetime, timedelta
+from pathlib import Path
 
 from app import tools
 
@@ -37,6 +39,62 @@ def test_search_reports_not_found():
 def test_lecture_summary():
     assert "エージェント" in tools.get_lecture_summary(3)
     assert "まだありません" in tools.get_lecture_summary(99)
+
+
+def test_make_quiz_for_lecture2_matches_glossary():
+    quiz = json.loads(tools.make_quiz(2))
+    terms = [entry for entry in tools.load_glossary() if entry["lecture"] == 2]
+    assert any(
+        entry["term"] in quiz["question"] and entry["definition"] == quiz["answer"]
+        for entry in terms
+    )
+
+
+def test_make_quiz_reports_missing_lecture():
+    result = json.loads(tools.make_quiz(0))
+    assert "第0回" in result["error"]
+    assert "見つかりません" in result["error"]
+
+
+def test_save_learning_log_records_content_and_utc_time(tmp_path, monkeypatch):
+    log_dir = tmp_path / "learning_log"
+    monkeypatch.setattr(tools, "LEARNING_LOG_DIR", log_dir)
+    content = "ツール実行前の承認について学んだ。\n次は拒否した場合も試す。"
+
+    result = json.loads(tools.save_learning_log(3, content))
+
+    assert result["saved"] is True
+    path = Path(result["path"])
+    assert path.parent == log_dir
+    record = json.loads(path.read_text(encoding="utf-8"))
+    assert record["lecture"] == 3
+    assert record["content"] == content
+    assert datetime.fromisoformat(record["saved_at"]).utcoffset() == timedelta(0)
+
+
+def test_save_learning_log_creates_separate_files(tmp_path, monkeypatch):
+    log_dir = tmp_path / "learning_log"
+    monkeypatch.setattr(tools, "LEARNING_LOG_DIR", log_dir)
+
+    first = json.loads(tools.save_learning_log(3, "最初の学習記録"))
+    second = json.loads(tools.save_learning_log(3, "次の学習記録"))
+
+    assert first["path"] != second["path"]
+    assert len(list(log_dir.glob("*.json"))) == 2
+    assert json.loads(Path(first["path"]).read_text(encoding="utf-8"))["content"] == "最初の学習記録"
+    assert json.loads(Path(second["path"]).read_text(encoding="utf-8"))["content"] == "次の学習記録"
+
+
+def test_save_learning_log_rejects_invalid_input_without_writing(tmp_path, monkeypatch):
+    log_dir = tmp_path / "learning_log"
+    monkeypatch.setattr(tools, "LEARNING_LOG_DIR", log_dir)
+
+    for lecture, content in [(0, "学習記録"), (-1, "学習記録"), (3, ""), (3, " \n\t　")]:
+        result = json.loads(tools.save_learning_log(lecture, content))
+        assert result["saved"] is False
+        assert result["path"] is None
+        assert result["message"]
+        assert not log_dir.exists()
 
 
 def test_default_question_of_lecture1_is_answerable_from_glossary():

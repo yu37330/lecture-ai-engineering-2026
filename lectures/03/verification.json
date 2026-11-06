@@ -1,0 +1,52 @@
+{
+  "checked_date_jst": "2026-11-07",
+  "status": "offline_verified_live_run_pending",
+  "repository": "yu37330/lecture-ai-engineering-2026",
+  "base_tag": "lec03-start",
+  "base_commit": "123fcc1ef692d1b60021c9d902d2e0c29ec3b582",
+  "execution_environment": {
+    "os": "Windows",
+    "python": "3.12.7",
+    "pydantic_ai_slim": "2.57.0",
+    "google_genai": "2.31.0",
+    "pytest": "9.1.1",
+    "dependencies": "uv sync --frozen --python 3.12"
+  },
+  "baseline": {
+    "command": "uv run --frozen pytest -q",
+    "result": "11 passed in 16.76s"
+  },
+  "implementation": {
+    "command": "uv run --frozen pytest -q",
+    "result": "22 passed in 13.14s",
+    "verified_tools": [
+      "search_glossary",
+      "get_lecture_summary",
+      "make_quiz",
+      "save_learning_log"
+    ],
+    "verified_behaviors": [
+      "no write before approval",
+      "no write on denial, empty input or EOF",
+      "separate approval per tool call",
+      "approved content is saved in a new JSON file",
+      "empty content and invalid lecture numbers do not write",
+      "message history is preserved across resume",
+      "request usage includes the initial and resumed runs",
+      "tool listing does not execute saving tools",
+      "existing MCP tests pass"
+    ]
+  },
+  "model_testing": {
+    "type": "TestModel and FunctionModel; no provider requests",
+    "gemini_api_called": false,
+    "learner_live_run_completed": false,
+    "live_response_and_trace": null
+  },
+  "remaining": [
+    "Compare app.ask and app.agent on the same course question",
+    "Inspect actual LoRA/QLoRA and make_quiz traces",
+    "Approve and deny saves while running Gemini in Codespaces",
+    "Record the learner's observed results and reflections in answer.md"
+  ]
+}

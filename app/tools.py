@@ -5,10 +5,14 @@
 """
 
 import json
+import random
+from datetime import datetime, timezone
 from functools import cache
 from pathlib import Path
+from uuid import uuid4
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+LEARNING_LOG_DIR = DATA_DIR.parent / "learning_log"
 MAX_RESULTS = 3
 
 
@@ -77,3 +81,57 @@ def get_lecture_summary(lecture: int) -> str:
         available = sorted(p.stem for p in (DATA_DIR / "lectures").glob("*.md"))
         return f"第{lecture}回の要点はまだありません。用意されている回: {', '.join(available)}"
     return path.read_text(encoding="utf-8")
+
+
+def make_quiz(lecture: int) -> str:
+    """指定した回の用語集から確認問題を1問選び、問題と正解を返す。
+
+    講義の復習や理解度確認を頼まれたときに使う。lecture は1始まりの回番号。
+    answer は採点用なので、出題時には question だけを見せ、回答後に説明する。
+    """
+    candidates = [entry for entry in load_glossary() if entry["lecture"] == lecture]
+    if not candidates:
+        return json.dumps(
+            {"error": f"第{lecture}回の用語が見つかりません。別の回を指定してください。"},
+            ensure_ascii=False,
+        )
+
+    entry = random.choice(candidates)
+    return json.dumps(
+        {
+            "question": f"「{entry['term']}」とは何ですか？",
+            "answer": entry["definition"],
+        },
+        ensure_ascii=False,
+    )
+
+
+def save_learning_log(lecture: int, content: str) -> str:
+    """ユーザーが承認した学習内容を、講義回とともに新しいJSONファイルへ保存する。
+
+    学習内容の記録を頼まれたときに使う。lecture は1始まりの回番号、content は
+    保存する本文。エージェントの承認確認を通過してから実行すること。
+    保存先はリポジトリ直下の learning_log/ に固定し、保存先の指定は受け付けない。
+    """
+    if lecture <= 0:
+        return json.dumps(
+            {"saved": False, "path": None, "message": "回番号は1以上の整数で指定してください。"},
+            ensure_ascii=False,
+        )
+    if not content.strip():
+        return json.dumps(
+            {"saved": False, "path": None, "message": "学習記録の本文が空です。保存する内容を指定してください。"},
+            ensure_ascii=False,
+        )
+
+    saved_at = datetime.now(timezone.utc)
+    filename = f"lec{lecture:02d}_{saved_at.strftime('%Y%m%dT%H%M%S%fZ')}_{uuid4().hex}.json"
+    path = LEARNING_LOG_DIR / filename
+    record = {"lecture": lecture, "content": content, "saved_at": saved_at.isoformat()}
+    LEARNING_LOG_DIR.mkdir(parents=True, exist_ok=True)
+    # 排他的な新規作成により、万一同じ名前が生成されても既存の記録を上書きしない。
+    with path.open("x", encoding="utf-8") as f:
+        json.dump(record, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+    return json.dumps({"saved": True, "path": str(path)}, ensure_ascii=False)
